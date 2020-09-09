@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.hansolo.swing.jdp;
+package eu.hansolo.jdp;
 
 public enum DatePickerEventType {
     DATE_SELECTED,

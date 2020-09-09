@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.hansolo.swing.jdp;
+package eu.hansolo.jdp;
 
 import javax.swing.*;
 import javax.swing.JSpinner.DefaultEditor;
@@ -41,13 +41,14 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static eu.hansolo.swing.jdp.DisplayMode.DATE_AND_TIME;
-import static eu.hansolo.swing.jdp.DisplayMode.DATE_ONLY;
+import static eu.hansolo.jdp.DisplayMode.DATE_AND_TIME;
+import static eu.hansolo.jdp.DisplayMode.DATE_ONLY;
 
 
 public class DatePickerPopup extends JComponent {
     public static final  boolean                       CALENDAR_WEEK_VISIBLE = true;
     public static final  boolean                       CALENDAR_WEEK_HIDDEN  = false;
+    private static final String                        RESOURCE_BUNDLE_NAME  = "eu.hansolo.jdp.DatePickerBundle";
     private static final DateTimeFormatter             DTF                   = DateTimeFormatter.ofPattern("MMM yyyy");
     private static final int                           MIN_WIDTH             = 120;
     private static final int                           MIN_HEIGHT            = 64;
@@ -136,7 +137,7 @@ public class DatePickerPopup extends JComponent {
         this.displayMode             = displayMode;
         this.textColor               = textColor;
         this.weekendColor            = weekEndColor;
-        this.resourceBundle          = ResourceBundle.getBundle("eu.hansolo.swing.jdp.DatePickerBundle", this.locale);
+        this.resourceBundle          = ResourceBundle.getBundle(RESOURCE_BUNDLE_NAME, this.locale);
         this.observers               = new CopyOnWriteArrayList();
         this.selectedDate            = selectedDate;
         this.selectedTime            = selectedDate.toLocalTime();
@@ -562,7 +563,7 @@ public class DatePickerPopup extends JComponent {
         this.locale              = locale;
         this.weekFields          = WeekFields.of(this.locale);
         this.startOfWeek         = weekFields.getFirstDayOfWeek();
-        this.resourceBundle      = ResourceBundle.getBundle("eu.hansolo.swing.jdp.DatePickerBundle", this.locale);
+        this.resourceBundle      = ResourceBundle.getBundle(RESOURCE_BUNDLE_NAME, this.locale);
         this.dateFormatter       = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(locale);
         this.timeFormatter       = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale);
 

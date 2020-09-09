@@ -14,40 +14,23 @@
  * limitations under the License.
  */
 
-package eu.hansolo.swing.jdp;
+package eu.hansolo.jdp;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.text.DateFormatter;
 import java.awt.*;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.DateTimeException;
-import java.time.DayOfWeek;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.format.FormatStyle;
-import java.time.temporal.WeekFields;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
 import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.concurrent.CopyOnWriteArrayList;
 
-import static eu.hansolo.swing.jdp.DisplayMode.DATE_AND_TIME;
-import static eu.hansolo.swing.jdp.DisplayMode.DATE_ONLY;
+import static eu.hansolo.jdp.DisplayMode.DATE_AND_TIME;
 
 
 public class DatePicker extends JPanel {

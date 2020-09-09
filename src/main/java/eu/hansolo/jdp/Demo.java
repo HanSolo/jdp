@@ -14,17 +14,9 @@
  * limitations under the License.
  */
 
-package eu.hansolo.swing.jdp;
+package eu.hansolo.jdp;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowFocusListener;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Locale;
 
 
