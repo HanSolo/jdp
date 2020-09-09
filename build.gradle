@@ -121,8 +121,8 @@ jar {
                 'Bundle-Name': project.name,
                 'Bundle-License': 'https://www.apache.org/licenses/LICENSE-2.0;description=Apache License Version 2.0;link=https://spdx.org/licenses/Apache-2.0.html',
                 'Bundle-Description': config.info.description,
-                'Bundle-SymbolicName': 'eu.hansolo.swing.jdp',
-                'Export-Package': 'eu.hansolo.swing.jdp'
+                'Bundle-SymbolicName': 'eu.hansolo.jdp',
+                'Export-Package': 'eu.hansolo.jdp'
         )
     }
 }
@@ -143,6 +143,6 @@ publishing {
 
 // start the app from gradle
 task Demo(type: JavaExec) {
-    main = "eu.hansolo.swing.jdp.Demo"
+    main = "eu.hansolo.jdp.Demo"
     classpath = sourceSets.main.runtimeClasspath
 }
