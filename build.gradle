@@ -127,19 +127,6 @@ jar {
     }
 }
 
-publishing {
-    publications {
-        main(MavenPublication) {
-            pom.withXml {
-                asNode().dependencies.'*'.findAll {
-                    it.groupId.text() == 'org.openjfx'
-                }.each {
-                    it.remove(it.classifier)
-                }
-            }
-        }
-    }
-}
 
 // start the app from gradle
 task Demo(type: JavaExec) {
