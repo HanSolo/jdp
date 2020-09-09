@@ -1,0 +1,14 @@
+pluginManagement {
+    repositories {
+        jcenter()
+        gradlePluginPortal()
+    }
+    plugins {
+        id 'com.gradle.enterprise' version '3.4.1'
+        id 'org.kordamp.gradle.java-project' version '0.39.0'
+        id 'biz.aQute.bnd.builder' version '5.1.2'
+    }
+}
+
+rootProject.name = 'jdp'
+
