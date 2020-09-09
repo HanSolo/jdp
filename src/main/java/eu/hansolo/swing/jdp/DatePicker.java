@@ -52,6 +52,7 @@ import static eu.hansolo.swing.jdp.DisplayMode.DATE_ONLY;
 public class DatePicker extends JPanel {
     private DatePickerPopup popup;
 
+    // ******************** Constructors **************************************
     public DatePicker() {
         this(Locale.getDefault(), false, true, ZonedDateTime.now(), ZoneId.systemDefault(), DATE_AND_TIME, "hh:mm", "dd.MM.yyyy", Color.black, Color.red);
     }
@@ -124,6 +125,7 @@ public class DatePicker extends JPanel {
     }
 
 
+    // ******************** Public methods ************************************
     public ZonedDateTime getSelectedDate() {
         return popup.getSelectedDate();
     }
