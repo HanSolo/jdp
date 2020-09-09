@@ -31,8 +31,8 @@ import java.util.Locale;
 public class Demo {
 
     public Demo() {
-        JFrame frame = new JFrame("DatePicker");
-        frame.setSize(280, 310);
+        JFrame frame = new JFrame("JDP Java Date Picker");
+        frame.setSize(280, 100);
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
