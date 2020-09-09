@@ -17,10 +17,13 @@
 package eu.hansolo.swing.jdp;
 
 import javax.swing.*;
+import javax.swing.JSpinner.DefaultEditor;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -54,8 +57,8 @@ public class DatePickerPopup extends JComponent {
     private static final int                           MAX_HEIGHT            = 2048;
     private              int                           oldWidth              = PREFERRED_WIDTH;
     private              int                           oldHeight             = PREFERRED_HEIGHT;
-    protected            DateTimeFormatter             timeFormatter         = DateTimeFormatter.ofPattern("hh:mm");
-    protected            DateTimeFormatter             dateFormatter         = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    protected            DateTimeFormatter             timeFormatter;
+    protected            DateTimeFormatter             dateFormatter;
     private              DateTimeFormatter             todaysDateFormatter;
     private              List<DatePickerEventObserver> observers;
     private              Locale                        locale;
@@ -101,48 +104,54 @@ public class DatePickerPopup extends JComponent {
 
     // ******************** Constructors **************************************
     public DatePickerPopup() {
-        this(Locale.getDefault(), false, true, ZonedDateTime.now(), ZoneId.systemDefault(), DATE_AND_TIME, "hh:mm", "dd.mm.YYYY", Color.black, Color.red);
+        this(Locale.getDefault(), false, true, ZonedDateTime.now(), ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red);
     }
     public DatePickerPopup(final LocalDate selectedDate) {
-        this(Locale.getDefault(), false, true, ZonedDateTime.of(selectedDate, LocalTime.now(), ZoneId.systemDefault()), ZoneId.systemDefault(), DATE_AND_TIME, "hh:mm", "dd.mm.YYYY", Color.black, Color.red);
+        this(Locale.getDefault(), false, true, ZonedDateTime.of(selectedDate, LocalTime.now(), ZoneId.systemDefault()), ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red);
     }
     public DatePickerPopup(final ZonedDateTime selectedDate) {
-        this(Locale.getDefault(), false, true, selectedDate, ZoneId.systemDefault(), DATE_AND_TIME, "hh:mm", "dd.mm.YYYY", Color.black, Color.red);
+        this(Locale.getDefault(), false, true, selectedDate, ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red);
     }
     public DatePickerPopup(final boolean calendarWeekVisible, final ZonedDateTime selectedDate) {
-        this(Locale.getDefault(), calendarWeekVisible, true, selectedDate, ZoneId.systemDefault(), DATE_AND_TIME, "hh:mm", "dd.mm.YYYY", Color.black, Color.red);
+        this(Locale.getDefault(), calendarWeekVisible, true, selectedDate, ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red);
     }
     public DatePickerPopup(final Locale locale, final ZonedDateTime selectedDate) {
-        this(locale, false, true, selectedDate, ZoneId.systemDefault(), DATE_AND_TIME, "hh:mm", "dd.mm.YYYY", Color.black, Color.red);
+        this(locale, false, true, selectedDate, ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red);
     }
-    public DatePickerPopup(final Locale locale, final boolean calendarWeekVisible, final boolean todaysDateVisible, final ZonedDateTime selectedDate, final ZoneId zoneId, final DisplayMode displayMode, final String timeFormat, final String dateFormat, final Color textColor, final Color weekEndColor) {
+    public DatePickerPopup(final Locale locale, final boolean calendarWeekVisible, final boolean todaysDateVisible, final ZonedDateTime selectedDate, final ZoneId zoneId, final DisplayMode displayMode, final Color textColor, final Color weekEndColor) {
         setBorder(new EmptyBorder(10, 10, 10, 10));
-        this.locale               = locale;
-        this.zoneId               = zoneId;
-        this.todaysDateFormatter  = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(locale);
-        this.calendarWeekVisible  = calendarWeekVisible;
-        this.todaysDateVisible    = todaysDateVisible;
-        this.displayMode          = displayMode;
-        this.textColor            = textColor;
-        this.weekendColor         = weekEndColor;
-        this.timeFormat           = timeFormat;
-        this.dateFormat           = dateFormat;
-        this.resourceBundle       = ResourceBundle.getBundle("eu.hansolo.swing.jdp.DatePickerBundle", this.locale);
-        this.observers            = new CopyOnWriteArrayList();
-        this.selectedDate         = selectedDate;
-        this.selectedTime         = selectedDate.toLocalTime();
-        this.currentDate          = selectedDate;
-        this.currentMonthFont     = new Font("SansSerif", Font.BOLD, 10);
-        this.daysOfWeekFont       = new Font("SansSerif", Font.PLAIN, 10);
-        this.calendarWeekFont     = new Font("SansSerif", Font.PLAIN, 8);
-        this.dayFont              = new Font("SansSerif", Font.PLAIN, 10);
-        this.spinnerFont          = new Font("SansSerif", Font.PLAIN, 12);
-        this.daysOfWeek           = new ArrayList<>();
-        this.calendarWeeks        = new ArrayList<>();
-        this.days                 = new ArrayList<>();
-        this.weekFields           = WeekFields.of(this.locale);
-        this.startOfWeek          = weekFields.getFirstDayOfWeek();
-        this.controlClickListener = e -> {
+        this.locale                  = locale;
+
+        SimpleDateFormat datePattern = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
+        SimpleDateFormat timePattern = (SimpleDateFormat) DateFormat.getTimeInstance(DateFormat.DEFAULT, locale);
+
+        this.dateFormatter           = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(locale);
+        this.timeFormatter           = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale);
+        this.dateFormat              = datePattern.toLocalizedPattern();
+        this.timeFormat              = timePattern.toLocalizedPattern();
+        this.zoneId                  = zoneId;
+        this.todaysDateFormatter     = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(locale);
+        this.calendarWeekVisible     = calendarWeekVisible;
+        this.todaysDateVisible       = todaysDateVisible;
+        this.displayMode             = displayMode;
+        this.textColor               = textColor;
+        this.weekendColor            = weekEndColor;
+        this.resourceBundle          = ResourceBundle.getBundle("eu.hansolo.swing.jdp.DatePickerBundle", this.locale);
+        this.observers               = new CopyOnWriteArrayList();
+        this.selectedDate            = selectedDate;
+        this.selectedTime            = selectedDate.toLocalTime();
+        this.currentDate             = selectedDate;
+        this.currentMonthFont        = new Font("SansSerif", Font.BOLD, 10);
+        this.daysOfWeekFont          = new Font("SansSerif", Font.PLAIN, 10);
+        this.calendarWeekFont        = new Font("SansSerif", Font.PLAIN, 8);
+        this.dayFont                 = new Font("SansSerif", Font.PLAIN, 10);
+        this.spinnerFont             = new Font("SansSerif", Font.PLAIN, 12);
+        this.daysOfWeek              = new ArrayList<>();
+        this.calendarWeeks           = new ArrayList<>();
+        this.days                    = new ArrayList<>();
+        this.weekFields              = WeekFields.of(this.locale);
+        this.startOfWeek             = weekFields.getFirstDayOfWeek();
+        this.controlClickListener    = e -> {
             Object src = e.getSource();
             if (src.equals(previousYearButton)) {
                 setCurrentDate(getCurrentDate().minusYears(1));
@@ -154,7 +163,7 @@ public class DatePickerPopup extends JComponent {
                 setCurrentDate(getCurrentDate().plusYears(1));
             }
         };
-        this.onClickListener      = e -> {
+        this.onClickListener         = e -> {
             JButton button = (JButton) e.getSource();
             ZonedDateTime selected = ZonedDateTime.of(LocalDate.of(getCurrentDate().getYear(), getCurrentDate().getMonthValue(), Integer.parseInt(button.getText())), selectedTime, zoneId);
             setSelectedDate(selected);
@@ -162,7 +171,7 @@ public class DatePickerPopup extends JComponent {
             button.requestFocus();
             fireDatePickerEvent(new DatePickerEvent(DatePickerPopup.this, DatePickerEventType.DATE_SELECTED, selected));
         };
-        this.timeChangeListener   = e -> {
+        this.timeChangeListener      = e -> {
             this.selectedTime = LocalTime.ofInstant((((Date) timeSpinner.getValue()).toInstant()), getZoneId());
             ZonedDateTime selected = ZonedDateTime.of(getSelectedDate().toLocalDate(), selectedTime, getZoneId());
             fireDatePickerEvent(new DatePickerEvent(DatePickerPopup.this, DatePickerEventType.DATE_SELECTED, selected));
@@ -395,6 +404,8 @@ public class DatePickerPopup extends JComponent {
             timeSpinner.setValue(date);
             timeSpinner.setEditor(new JSpinner.DateEditor(timeSpinner, getTimeFormat()));
             timeSpinner.addChangeListener(timeChangeListener);
+            JSpinner.DefaultEditor spinnerEditor = (DefaultEditor) timeSpinner.getEditor();
+            spinnerEditor.getTextField().setHorizontalAlignment(JTextField.CENTER);
 
             gridConstraints.fill      = GridBagConstraints.VERTICAL;
             gridConstraints.gridx     = 0;
@@ -552,6 +563,14 @@ public class DatePickerPopup extends JComponent {
         this.weekFields          = WeekFields.of(this.locale);
         this.startOfWeek         = weekFields.getFirstDayOfWeek();
         this.resourceBundle      = ResourceBundle.getBundle("eu.hansolo.swing.jdp.DatePickerBundle", this.locale);
+        this.dateFormatter       = DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(locale);
+        this.timeFormatter       = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale);
+
+        SimpleDateFormat datePattern = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
+        this.dateFormat = datePattern.toLocalizedPattern();
+        SimpleDateFormat timePattern = (SimpleDateFormat) DateFormat.getTimeInstance(DateFormat.DEFAULT, locale);
+        this.timeFormat = timePattern.toLocalizedPattern();
+
         this.todaysDateFormatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.FULL).withLocale(locale);
         reInit();
     }

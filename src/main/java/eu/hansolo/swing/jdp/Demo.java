@@ -37,6 +37,7 @@ public class Demo {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         DatePicker datePicker = new DatePicker();
+        datePicker.setLocale(Locale.US);
         datePicker.setOnDatePickerEvent(e -> System.out.println("Selected date: " + e.getDate()));
 
         frame.getContentPane().add(datePicker);

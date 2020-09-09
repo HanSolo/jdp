@@ -20,6 +20,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.text.DateFormatter;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -50,37 +51,39 @@ import static eu.hansolo.swing.jdp.DisplayMode.DATE_ONLY;
 
 
 public class DatePicker extends JPanel {
-    private DatePickerPopup popup;
+    private JFormattedTextField dateField;
+    private DatePickerPopup     popup;
 
     // ******************** Constructors **************************************
     public DatePicker() {
-        this(Locale.getDefault(), false, true, ZonedDateTime.now(), ZoneId.systemDefault(), DATE_AND_TIME, "hh:mm", "dd.MM.yyyy", Color.black, Color.red);
+        this(Locale.getDefault(), false, true, ZonedDateTime.now(), ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red);
     }
     public DatePicker(final LocalDate selectedDate) {
 
-        this(Locale.getDefault(), false, true, ZonedDateTime.of(selectedDate, LocalTime.now(), ZoneId.systemDefault()), ZoneId.systemDefault(), DATE_AND_TIME, "hh:mm", "dd.MM.yyyy", Color.black, Color.red);
+        this(Locale.getDefault(), false, true, ZonedDateTime.of(selectedDate, LocalTime.now(), ZoneId.systemDefault()), ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red);
     }
     public DatePicker(final ZonedDateTime selectedDate) {
-        this(Locale.getDefault(), false, true, selectedDate, ZoneId.systemDefault(), DATE_AND_TIME, "hh:mm", "dd.MM.yyyy", Color.black, Color.red);
+        this(Locale.getDefault(), false, true, selectedDate, ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red);
     }
     public DatePicker(final boolean calendarWeekVisible, final ZonedDateTime selectedDate) {
-        this(Locale.getDefault(), calendarWeekVisible, true, selectedDate, ZoneId.systemDefault(), DATE_AND_TIME, "hh:mm", "dd.MM.yyyy", Color.black, Color.red);
+        this(Locale.getDefault(), calendarWeekVisible, true, selectedDate, ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red);
     }
     public DatePicker(final Locale locale, final ZonedDateTime selectedDate) {
-        this(locale, false, true, selectedDate, ZoneId.systemDefault(), DATE_AND_TIME, "hh:mm", "dd.MM.yyyy", Color.black, Color.red);
+        this(locale, false, true, selectedDate, ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red);
     }
     public DatePicker(final Locale locale, final boolean calendarWeekVisible, final ZonedDateTime selectedDate, final DisplayMode displayMode) {
-        this(locale, calendarWeekVisible, true, selectedDate, ZoneId.systemDefault(), displayMode, "hh:mm", "dd.MM.yyyy", Color.black, Color.red);
+        this(locale, calendarWeekVisible, true, selectedDate, ZoneId.systemDefault(), displayMode, Color.black, Color.red);
     }
-    public DatePicker(final Locale locale, final boolean calendarWeekVisible, final boolean todaysDateVisible, final ZonedDateTime selectedDate, final ZoneId zoneId, final DisplayMode displayMode, final String timeFormat, final String dateFormat, final Color textColor, final Color weekendColor) {
+    public DatePicker(final Locale locale, final boolean calendarWeekVisible, final boolean todaysDateVisible, final ZonedDateTime selectedDate, final ZoneId zoneId, final DisplayMode displayMode, final Color textColor, final Color weekendColor) {
         setLayout(new GridBagLayout());
         setPreferredSize(new Dimension(200, 20));
         setMaximumSize(new Dimension(200, 20));
 
-        popup = new DatePickerPopup(locale, calendarWeekVisible, todaysDateVisible, selectedDate, zoneId, displayMode, timeFormat, dateFormat, textColor, weekendColor);
-        popup.setDateFormat(dateFormat);
+        popup = new DatePickerPopup(locale, calendarWeekVisible, todaysDateVisible, selectedDate, zoneId, displayMode, textColor, weekendColor);
 
-        JTextField dateField = new JFormattedTextField(new SimpleDateFormat(dateFormat));
+        SimpleDateFormat datePattern = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
+
+        dateField = new JFormattedTextField(new SimpleDateFormat(datePattern.toLocalizedPattern()));
         dateField.setHorizontalAlignment(SwingConstants.RIGHT);
         dateField.setPreferredSize(new Dimension(120, 20));
 
@@ -102,7 +105,11 @@ public class DatePicker extends JPanel {
                     }
                 }
                 @Override public void windowLostFocus(final WindowEvent e) {
-                    if (SwingUtilities.isDescendingFrom(e.getOppositeWindow(), dialog)) {
+                    try {
+                        if (SwingUtilities.isDescendingFrom(e.getOppositeWindow(), dialog)) {
+                            return;
+                        }
+                    } catch (NullPointerException ex) {
                         return;
                     }
                     popupButton.setText("\u25c2");
@@ -140,6 +147,12 @@ public class DatePicker extends JPanel {
         popup.setCurrentDate(currentDate);
     }
 
+    public void setLocale(final Locale locale) {
+        popup.setLocale(locale);
+        dateField.setLocale(locale);
+        DateFormatter dateFormatter = (DateFormatter) dateField.getFormatter();
+        dateFormatter.setFormat(DateFormat.getDateInstance(DateFormat.DEFAULT, locale));
+    }
 
     public void setOnDatePickerEvent(final DatePickerEventObserver observer) {
         addDatePickerEventObserver(observer);
