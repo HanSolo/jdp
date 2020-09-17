@@ -18,7 +18,17 @@
 package eu.hansolo.jdp;
 
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicLookAndFeel;
+import javax.swing.plaf.metal.MetalLookAndFeel;
+import javax.swing.plaf.multi.MultiLookAndFeel;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
+import java.awt.*;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Locale;
+
+import static eu.hansolo.jdp.DatePicker.CALENDAR_WEEK_HIDDEN;
+import static eu.hansolo.jdp.DatePicker.TODAYS_DATE_HIDDEN;
 
 
 public class Demo {
@@ -29,9 +39,23 @@ public class Demo {
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        DatePicker datePicker = new DatePicker();
-        datePicker.setLocale(Locale.US);
-        datePicker.setOnDatePickerEvent(e -> System.out.println("Selected date: " + e.getDate()));
+        /*
+        try {
+            UIManager.setLookAndFeel(new MetalLookAndFeel());
+            //UIManager.setLookAndFeel(new NimbusLookAndFeel());
+        } catch (UnsupportedLookAndFeelException e) {
+            e.printStackTrace();
+        }
+        */
+
+        //DatePicker datePicker = new DatePicker();
+        //datePicker.setLocale(Locale.US);
+        //datePicker.setLocale(Locale.GERMANY);
+        //datePicker.setTodaysDateVisible(false);
+        //datePicker.setDisplayMode(DisplayMode.DATE_ONLY);
+        //datePicker.setOnDatePickerEvent(e -> System.out.println("Selected date: " + e.getDate()));
+
+        DatePicker datePicker = new DatePicker(Locale.GERMANY, CALENDAR_WEEK_HIDDEN, TODAYS_DATE_HIDDEN, ZonedDateTime.now(), ZoneId.systemDefault(), DisplayMode.DATE_ONLY, Color.black, Color.black, true);
 
         frame.getContentPane().add(datePicker);
         frame.setVisible(true);

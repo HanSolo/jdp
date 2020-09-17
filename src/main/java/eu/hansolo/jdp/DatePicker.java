@@ -18,6 +18,8 @@
 package eu.hansolo.jdp;
 
 import javax.swing.*;
+import javax.swing.plaf.metal.MetalLookAndFeel;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import javax.swing.text.DateFormatter;
 import java.awt.*;
 import java.awt.event.WindowEvent;
@@ -35,33 +37,44 @@ import static eu.hansolo.jdp.DisplayMode.DATE_AND_TIME;
 
 
 public class DatePicker extends JPanel {
-    private JFormattedTextField dateField;
-    private DatePickerPopup     popup;
+    public static final  boolean             CALENDAR_WEEK_VISIBLE = true;
+    public static final  boolean             CALENDAR_WEEK_HIDDEN  = false;
+    public static final  boolean             TODAYS_DATE_VISIBLE   = true;
+    public static final  boolean             TODAYS_DATE_HIDDEN    = false;
+    private              JFormattedTextField dateField;
+    private              DatePickerPopup     popup;
+    private              JDialog             dialog;
+    private              boolean             autoClosePopup;
 
     // ******************** Constructors **************************************
     public DatePicker() {
-        this(Locale.getDefault(), false, true, ZonedDateTime.now(), ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red);
+        this(Locale.getDefault(), false, true, ZonedDateTime.now(), ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red, true);
     }
     public DatePicker(final LocalDate selectedDate) {
 
-        this(Locale.getDefault(), false, true, ZonedDateTime.of(selectedDate, LocalTime.now(), ZoneId.systemDefault()), ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red);
+        this(Locale.getDefault(), false, true, ZonedDateTime.of(selectedDate, LocalTime.now(), ZoneId.systemDefault()), ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red, true);
     }
     public DatePicker(final ZonedDateTime selectedDate) {
-        this(Locale.getDefault(), false, true, selectedDate, ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red);
+        this(Locale.getDefault(), false, true, selectedDate, ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red, true);
     }
     public DatePicker(final boolean calendarWeekVisible, final ZonedDateTime selectedDate) {
-        this(Locale.getDefault(), calendarWeekVisible, true, selectedDate, ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red);
+        this(Locale.getDefault(), calendarWeekVisible, true, selectedDate, ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red, true);
     }
     public DatePicker(final Locale locale, final ZonedDateTime selectedDate) {
-        this(locale, false, true, selectedDate, ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red);
+        this(locale, false, true, selectedDate, ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red, true);
     }
     public DatePicker(final Locale locale, final boolean calendarWeekVisible, final ZonedDateTime selectedDate, final DisplayMode displayMode) {
-        this(locale, calendarWeekVisible, true, selectedDate, ZoneId.systemDefault(), displayMode, Color.black, Color.red);
+        this(locale, calendarWeekVisible, true, selectedDate, ZoneId.systemDefault(), displayMode, Color.black, Color.red, true);
     }
     public DatePicker(final Locale locale, final boolean calendarWeekVisible, final boolean todaysDateVisible, final ZonedDateTime selectedDate, final ZoneId zoneId, final DisplayMode displayMode, final Color textColor, final Color weekendColor) {
+        this(locale, calendarWeekVisible, todaysDateVisible, selectedDate, zoneId, displayMode, textColor, weekendColor, true);
+    }
+    public DatePicker(final Locale locale, final boolean calendarWeekVisible, final boolean todaysDateVisible, final ZonedDateTime selectedDate, final ZoneId zoneId, final DisplayMode displayMode, final Color textColor, final Color weekendColor, final boolean autoClosePopup) {
         setLayout(new GridBagLayout());
         setPreferredSize(new Dimension(200, 20));
         setMaximumSize(new Dimension(200, 20));
+
+        this.autoClosePopup = autoClosePopup;
 
         popup = new DatePickerPopup(locale, calendarWeekVisible, todaysDateVisible, selectedDate, zoneId, displayMode, textColor, weekendColor);
 
@@ -69,16 +82,37 @@ public class DatePicker extends JPanel {
 
         dateField = new JFormattedTextField(new SimpleDateFormat(datePattern.toLocalizedPattern()));
         dateField.setHorizontalAlignment(SwingConstants.RIGHT);
-        dateField.setPreferredSize(new Dimension(120, 20));
 
-        popup.setOnDatePickerEvent(e -> dateField.setText(popup.dateFormatter.format(popup.getSelectedDate())));
+        final int fontSize;
+        final int buttonWidth;
+        final int buttonHeight;
+        LookAndFeel laf = UIManager.getLookAndFeel();
+        if (laf instanceof MetalLookAndFeel) {
+            fontSize     = 12;
+            buttonWidth  = 20;
+            buttonHeight = 20;
+            dateField.setPreferredSize(new Dimension(120, 20));
+        } else if (laf instanceof NimbusLookAndFeel) {
+            fontSize     = 10;
+            buttonWidth  = 36;
+            buttonHeight = 24;
+            dateField.setPreferredSize(new Dimension(120, 24));
+        } else {
+            fontSize     = 12;
+            buttonWidth  = 20;
+            buttonHeight = 20;
+            dateField.setPreferredSize(new Dimension(120, 24));
+        }
 
         JButton popupButton = new JButton("\u25c2");
-        popupButton.setPreferredSize(new Dimension(20, 20));
+        popupButton.setFont(new Font("SansSerif", Font.PLAIN, fontSize));
+        popupButton.setVerticalTextPosition(SwingConstants.CENTER);
+        popupButton.setPreferredSize(new Dimension(buttonWidth, buttonHeight));
+        popupButton.setMargin(new Insets(0, 0, 0, 0));
         popupButton.addActionListener(e -> {
             Point p = dateField.getLocationOnScreen();
 
-            JDialog dialog = new JDialog();
+            dialog = new JDialog();
             dialog.addWindowFocusListener(new WindowFocusListener() {
                 @Override public void windowGainedFocus(final WindowEvent e) {
                     popupButton.setText("\u25be");
@@ -101,7 +135,17 @@ public class DatePicker extends JPanel {
                 }
             });
             dialog.setUndecorated(true);
-            dialog.setPreferredSize(new Dimension(280, 310));
+            switch (popup.getDisplayMode()) {
+                case DATE_AND_TIME:
+                    dialog.setPreferredSize(new Dimension(280, 310));
+                    break;
+                case DATE_ONLY:
+                    dialog.setPreferredSize(new Dimension(280, 220));
+                    break;
+                case TIME_ONLY:
+                    dialog.setPreferredSize(new Dimension(280, 20));
+                    break;
+            }
             //dialog.setModal(true);
             dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
             dialog.setLayout(new BorderLayout());
@@ -109,6 +153,14 @@ public class DatePicker extends JPanel {
             dialog.pack();
             dialog.setLocation(p.x, p.y + dateField.getHeight());
             dialog.setVisible(true);
+        });
+
+        popup.setOnDatePickerEvent(e -> {
+            dateField.setText(popup.dateFormatter.format(popup.getSelectedDate()));
+            if (autoClosePopup) {
+                dialog.setVisible(false);
+                popupButton.setText("\u25c2");
+            }
         });
 
         add(dateField);
@@ -129,6 +181,34 @@ public class DatePicker extends JPanel {
     }
     public void setCurrentDate(final ZonedDateTime currentDate) {
         popup.setCurrentDate(currentDate);
+    }
+
+    public boolean isTodaysDateVisible() {
+        return popup.isTodaysDateVisible();
+    }
+    public void setTodaysDateVisible(final boolean visible) {
+        popup.setTodaysDateVisible(visible);
+    }
+
+    public DisplayMode getDisplayMode() {
+        return popup.getDisplayMode();
+    }
+    public void setDisplayMode(final DisplayMode displayMode) {
+        popup.setDisplayMode(displayMode);
+    }
+
+    public Color getTextColor() {
+        return popup.getTextColor();
+    }
+    public void setTextColor(final Color textColor) {
+        popup.setTextColor(textColor);
+    }
+
+    public Color getWeekendColor() {
+        return popup.getWeekendColor();
+    }
+    public void setWeekendColor(final Color weekendColor) {
+        popup.setWeekendColor(weekendColor);
     }
 
     public void setLocale(final Locale locale) {

@@ -21,6 +21,10 @@ import javax.swing.*;
 import javax.swing.JSpinner.DefaultEditor;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeListener;
+import javax.swing.plaf.basic.BasicBorders;
+import javax.swing.plaf.basic.BasicBorders.ButtonBorder;
+import javax.swing.plaf.metal.MetalLookAndFeel;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.text.DateFormat;
@@ -47,8 +51,6 @@ import static eu.hansolo.jdp.DisplayMode.DATE_ONLY;
 
 
 public class DatePickerPopup extends JComponent {
-    public static final  boolean                       CALENDAR_WEEK_VISIBLE = true;
-    public static final  boolean                       CALENDAR_WEEK_HIDDEN  = false;
     private static final String                        RESOURCE_BUNDLE_NAME  = "eu.hansolo.jdp.DatePickerBundle";
     private static final DateTimeFormatter             DTF                   = DateTimeFormatter.ofPattern("MMM yyyy");
     private static final int                           MIN_WIDTH             = 120;
@@ -121,7 +123,7 @@ public class DatePickerPopup extends JComponent {
         this(locale, false, true, selectedDate, ZoneId.systemDefault(), DATE_AND_TIME, Color.black, Color.red);
     }
     public DatePickerPopup(final Locale locale, final boolean calendarWeekVisible, final boolean todaysDateVisible, final ZonedDateTime selectedDate, final ZoneId zoneId, final DisplayMode displayMode, final Color textColor, final Color weekEndColor) {
-        setBorder(new EmptyBorder(10, 10, 10, 10));
+        setBorder(new EmptyBorder(1, 1, 1, 1));
         this.locale                  = locale;
 
         SimpleDateFormat datePattern = (SimpleDateFormat) DateFormat.getDateInstance(DateFormat.DEFAULT, locale);
@@ -195,30 +197,47 @@ public class DatePickerPopup extends JComponent {
         buttonPane.setLayout(new GridBagLayout());
         GridBagConstraints topGridConstraints = new GridBagConstraints();
 
-        int buttonWidth   = 36;
-        int labelWidth    = 96;
-        int controlHeight = 20;
+        int labelWidth = 96;
+        int buttonWidth;
+        int controlHeight;
+        int spacer;
+        LookAndFeel laf = UIManager.getLookAndFeel();
+        if (laf instanceof MetalLookAndFeel) {
+            buttonWidth   = 40;
+            controlHeight = 22;
+            spacer        = 5;
+        } else if (laf instanceof NimbusLookAndFeel) {
+            buttonWidth   = 56;
+            controlHeight = 24;
+            spacer        = 2;
+        } else {
+            buttonWidth   = 40;
+            controlHeight = 22;
+            spacer        = 5;
+        }
 
         previousYearButton = new JButton("\u25c0\u25c0");
         previousYearButton.setPreferredSize(new Dimension(buttonWidth, controlHeight));
         previousYearButton.setMinimumSize(new Dimension(buttonWidth, controlHeight));
         previousYearButton.setMaximumSize(new Dimension(buttonWidth, controlHeight));
+        previousYearButton.setMargin(new Insets(0, 0, 0, 0));
         topGridConstraints.fill      = GridBagConstraints.HORIZONTAL;
         topGridConstraints.gridy     = 0;
         topGridConstraints.gridwidth = 1;
         topGridConstraints.weightx   = 0.1;
-        topGridConstraints.insets    = new Insets(0, 0, 0, 0);
+        topGridConstraints.insets    = new Insets(1, 1, 1, 1);
         buttonPane.add(previousYearButton, topGridConstraints);
 
         previousMonthButton = new JButton("\u25c0");
         previousMonthButton.setPreferredSize(new Dimension(buttonWidth, controlHeight));
         previousMonthButton.setMinimumSize(new Dimension(buttonWidth, controlHeight));
         previousMonthButton.setMaximumSize(new Dimension(buttonWidth, controlHeight));
+        previousMonthButton.setMargin(new Insets(0, 0, 0, 0));
         topGridConstraints.fill      = GridBagConstraints.HORIZONTAL;
         topGridConstraints.gridy     = 0;
         topGridConstraints.gridwidth = 1;
         topGridConstraints.weightx   = 0.1;
-        topGridConstraints.insets    = new Insets(0, 5, 0, 5);
+        topGridConstraints.insets    = new Insets(1, spacer, 1, spacer);
         buttonPane.add(previousMonthButton, topGridConstraints);
 
         currentMonthLabel = new JLabel(DTF.format(getCurrentDate()));
@@ -230,31 +249,32 @@ public class DatePickerPopup extends JComponent {
         topGridConstraints.gridy     = 0;
         topGridConstraints.weightx   = 0.6;
         topGridConstraints.gridwidth = isCalendarWeekVisible() ? 4 : 3;
-        topGridConstraints.insets    = new Insets(0, 5, 0, 5);
+        topGridConstraints.insets    = new Insets(1, spacer, 1, spacer);
         buttonPane.add(currentMonthLabel, topGridConstraints);
 
         nextMonthButton = new JButton("\u25ba");
         nextMonthButton.setPreferredSize(new Dimension(buttonWidth, controlHeight));
         nextMonthButton.setMinimumSize(new Dimension(buttonWidth, controlHeight));
         nextMonthButton.setMaximumSize(new Dimension(buttonWidth, controlHeight));
+        nextMonthButton.setMargin(new Insets(0, 0, 0, 0));
         topGridConstraints.fill      = GridBagConstraints.HORIZONTAL;
         topGridConstraints.gridy     = 0;
         topGridConstraints.gridwidth = 1;
         topGridConstraints.weightx   = 0.1;
-        topGridConstraints.insets    = new Insets(0, 5, 0, 5);
+        topGridConstraints.insets    = new Insets(1, spacer, 1, spacer);
         buttonPane.add(nextMonthButton, topGridConstraints);
 
         nextYearButton = new JButton("\u25ba\u25ba");
         nextYearButton.setPreferredSize(new Dimension(buttonWidth, controlHeight));
         nextYearButton.setMinimumSize(new Dimension(buttonWidth, controlHeight));
         nextYearButton.setMaximumSize(new Dimension(buttonWidth, controlHeight));
+        nextYearButton.setMargin(new Insets(0, 0, 0, 0));
         topGridConstraints.fill      = GridBagConstraints.HORIZONTAL;
         topGridConstraints.gridy     = 0;
         topGridConstraints.gridwidth = 1;
         topGridConstraints.weightx   = 0.1;
-        topGridConstraints.insets    = new Insets(0, 0, 0, 0);
+        topGridConstraints.insets    = new Insets(1, 1, 1, 1);
         buttonPane.add(nextYearButton, topGridConstraints);
-
 
         gridConstraints.fill      = GridBagConstraints.VERTICAL;
         gridConstraints.gridx     = 0;
@@ -332,6 +352,9 @@ public class DatePickerPopup extends JComponent {
                 } else {
                     try {
                         JButton button = new JButton(Integer.toString(day));
+                        button.setPreferredSize(new Dimension(40, 20));
+                        button.setMinimumSize(new Dimension(40, 20));
+                        button.setMaximumSize(new Dimension(40, 20));
                         button.setHorizontalTextPosition(SwingConstants.CENTER);
                         button.setFont(dayFont);
                         button.setForeground(getTextColor());
@@ -357,6 +380,9 @@ public class DatePickerPopup extends JComponent {
                         if (isCalendarWeekVisible() && c == 0) {
                             weekFields = WeekFields.of(locale);
                             calendarWeek = new JLabel(String.format("%01d", currentDate.get(weekFields.weekOfWeekBasedYear())));
+                            calendarWeek.setPreferredSize(new Dimension(20, 10));
+                            calendarWeek.setMinimumSize(new Dimension(20, 10));
+                            calendarWeek.setMaximumSize(new Dimension(20, 10));
                             calendarWeek.setHorizontalTextPosition(SwingConstants.CENTER);
                             calendarWeek.setHorizontalAlignment(SwingConstants.CENTER);
                             calendarWeek.setFont(calendarWeekFont);
@@ -365,6 +391,9 @@ public class DatePickerPopup extends JComponent {
                             calendarWeeks.add(calendarWeek);
                         } else {
                             JButton button = new JButton(Integer.toString(day));
+                            button.setPreferredSize(new Dimension(40, 20));
+                            button.setMinimumSize(new Dimension(40, 20));
+                            button.setMaximumSize(new Dimension(40, 20));
                             button.setHorizontalTextPosition(SwingConstants.CENTER);
                             button.setFont(dayFont);
                             button.setForeground(getTextColor());
@@ -404,6 +433,9 @@ public class DatePickerPopup extends JComponent {
             timeSpinner = new JSpinner();
             timeSpinner.setModel(model);
             timeSpinner.setValue(date);
+            timeSpinner.setPreferredSize(new Dimension(100, 20));
+            timeSpinner.setMinimumSize(new Dimension(100, 20));
+            timeSpinner.setMaximumSize(new Dimension(100, 20));
             timeSpinner.setEditor(new JSpinner.DateEditor(timeSpinner, getTimeFormat()));
             timeSpinner.addChangeListener(timeChangeListener);
             JSpinner.DefaultEditor spinnerEditor = (DefaultEditor) timeSpinner.getEditor();
@@ -414,7 +446,7 @@ public class DatePickerPopup extends JComponent {
             gridConstraints.gridy     = 2;
             gridConstraints.gridwidth = isCalendarWeekVisible() ? 8 : 7;
             gridConstraints.weightx   = 1;
-            gridConstraints.weighty   = 0.75;
+            gridConstraints.weighty   = 0.25;
             add(timeSpinner, gridConstraints);
         }
 
@@ -433,7 +465,7 @@ public class DatePickerPopup extends JComponent {
             gridConstraints.gridy     = 3;
             gridConstraints.gridwidth = isCalendarWeekVisible() ? 8 : 7;
             gridConstraints.weightx   = 1;
-            gridConstraints.weighty   = 0.75;
+            gridConstraints.weighty   = 0.5;
             add(todaysDateLabel, gridConstraints);
         }
     }
@@ -446,7 +478,9 @@ public class DatePickerPopup extends JComponent {
         nextMonthButton.removeActionListener(controlClickListener);
         nextYearButton.removeActionListener(controlClickListener);
 
-        timeSpinner.removeChangeListener(timeChangeListener);
+        if (null != timeSpinner) {
+            timeSpinner.removeChangeListener(timeChangeListener);
+        }
 
         days.forEach(button -> button.removeActionListener(onClickListener));
         daysOfWeek.clear();
@@ -519,12 +553,6 @@ public class DatePickerPopup extends JComponent {
             };
         }
         return weekDaysLong;
-    }
-
-    private int clamp(final int min, final int max, final int value) {
-        if (value < min) return min;
-        if (value > max) return max;
-        return value;
     }
 
 
@@ -664,11 +692,22 @@ public class DatePickerPopup extends JComponent {
         super.paintComponent(g);
 
         if (getWidth() != oldWidth || getHeight() != oldHeight || isDirty) {
-            final int minHeight = getHeight() / 10;
-            final int cellWidth = getWidth() / 28;
-            final int fontSize  = clamp(5, minHeight, cellWidth);
+            final int minHeight;
+            final int cellWidth;
+            LookAndFeel laf = UIManager.getLookAndFeel();
+            if (laf instanceof MetalLookAndFeel) {
+                minHeight = getHeight() / 20;
+                cellWidth = getWidth() / 30;
+            } else if (laf instanceof NimbusLookAndFeel) {
+                minHeight = getHeight() / 22;
+                cellWidth = getWidth() / 32;
+            } else {
+                minHeight = getHeight() / 20;
+                cellWidth = getWidth() / 30;
+            }
+            final int fontSize  = Helper.clamp(4, minHeight, cellWidth);
 
-            this.currentMonthFont = new Font("SansSerif", Font.BOLD, clamp(5, 16, fontSize + 2));
+            this.currentMonthFont = new Font("SansSerif", Font.BOLD, Helper.clamp(5, 16, fontSize + 2));
             this.daysOfWeekFont   = new Font("SansSerif", Font.PLAIN, fontSize);
             this.calendarWeekFont = new Font("SansSerif", Font.PLAIN, fontSize - 2);
             this.dayFont          = new Font("SansSerif", Font.PLAIN, fontSize);
@@ -680,7 +719,9 @@ public class DatePickerPopup extends JComponent {
             this.nextMonthButton.setFont(currentMonthFont);
             this.nextYearButton.setFont(currentMonthFont);
 
-            this.timeSpinner.setFont(spinnerFont);
+            if (null != this.timeSpinner) {
+                this.timeSpinner.setFont(spinnerFont);
+            }
 
             for (JLabel label : daysOfWeek) {
                 label.setFont(daysOfWeekFont);
@@ -690,6 +731,7 @@ public class DatePickerPopup extends JComponent {
             }
             for (JButton button : days) {
                 button.setFont(dayFont);
+                button.setMargin(new Insets(0, 0, 0, 0));
                 button.setSelected(false);
                 if (Integer.parseInt(button.getText()) == getSelectedDate().getDayOfMonth()) {
                     if (DTF.format(getSelectedDate()).equals(currentMonthLabel.getText())) {
